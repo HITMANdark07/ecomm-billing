@@ -16,6 +16,7 @@ import ManageAgents from './pages/ManageAgents';
 import SalesReport from './pages/SalesReport';
 import Bill from './pages/Bill';
 import makeToast from './Toaster';
+import UpdateCat from './pages/UpdateCat';
 
 function App(props) {
   const setUser = props.setCurerntUser;
@@ -58,6 +59,7 @@ function App(props) {
         <Route exact path="/agents" component={ManageAgents} />
         <Route exact path="/reports" component={SalesReport} />
         <Route exact path="/manage-category" component={ManageCategory} />
+        <Route exact path="/manage-category/:catID" component={UpdateCat} />
         <Route exact path="/manage-products" component={ManageProducts} />
         <Route exact path="/manage-products/:productID" component={ManageProduct} />
         <Route exact path="/manage-orders" component={ManageOrder} />

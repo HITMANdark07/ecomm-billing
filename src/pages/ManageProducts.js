@@ -24,6 +24,7 @@ import { setCurrentUser } from '../redux/user/user.action';
 import makeToast from '../Toaster';
 import EditIcon from '@mui/icons-material/Edit';
 import moment from 'moment';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 
 const ManageProducts = (props) => {
@@ -163,6 +164,14 @@ const ManageProducts = (props) => {
             makeToast("warning","please add an image...")
         }
     }
+    const deleteProduct = (id) => {
+        fs.collection("Products").doc(id).delete().then(() => {
+            makeToast("success", "Product Deleted...");
+            getProducts();
+        }).catch((error) => {
+            makeToast("error", error.message);
+        })
+    }
     return(
         <DashBoard logout={handleLogout} currentUserRole={ currentUser && currentUser.role}>
         <h2 style={{textAlign:"center"}}>CREATE PRODUCT</h2>
@@ -241,6 +250,7 @@ const ManageProducts = (props) => {
                     <StyledTableCell align="right">Created</StyledTableCell>
                     <StyledTableCell align="right">Updated</StyledTableCell>
                     <StyledTableCell align="right">Edit</StyledTableCell>
+                    <StyledTableCell align="right">Delete</StyledTableCell>
                 </TableRow>
                 </TableHead>
                 <TableBody>
@@ -261,6 +271,16 @@ const ManageProducts = (props) => {
                                 startIcon={<EditIcon/>}
                             >
                                 edit
+                            </Button>
+                            </StyledTableCell>
+                            <StyledTableCell align="right" onClick={() => deleteProduct(cartItem.id)}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color="secondary"
+                                startIcon={<DeleteForeverIcon/>}
+                            >
+                                Del
                             </Button>
                             </StyledTableCell>
                             </StyledTableRow>

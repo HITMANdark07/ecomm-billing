@@ -106,7 +106,8 @@ const Shop = (props) => {
         })
     }
     const totalTax = props.cartItems.reduce((acc,emm) => acc+(emm.CGST+emm.SGST),0);
-    const totalPayable = props.cartItems.reduce((acc,emm) => acc+(emm.totalPrice+emm.CGST+emm.SGST),0);
+    const totalPayable = props.cartItems.reduce((acc,emm) => acc+(emm.totalPrice+emm.CGST+emm.SGST-emm.totalDiscount),0);
+    const totalDiscount = props.cartItems.reduce((acc,emm)=> acc+emm.totalDiscount,0);
     const totalPrice = props.cartItems.reduce((acc,emm) => acc+emm.totalPrice ,0);
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
         [`&.${tableCellClasses.head}`]: {
@@ -136,10 +137,11 @@ const Shop = (props) => {
                 phone:data.get("phone"),
                 products: props.cartItems,
                 status: "NOT PROCCESSED",
-                totalPayable,
-                totalTax,
+                totalPayable:Number(totalPayable.toFixed(2)),
+                totalTax:Number(totalTax.toFixed(2)),
+                totalDiscount:Number(totalDiscount.toFixed(2)),
                 invoiceNumber:getInvoiceNumber(orderlength),
-                totalPrice,
+                totalPrice:Number(totalPrice.toFixed(2)),
                 payment,
                 date: Date.now()
             }).then((data) =>{
@@ -221,7 +223,7 @@ const Shop = (props) => {
                 ))}
                 </div>
             </div>
-            <div style={{maxWidth:"750px", margin:'20px auto', flexDirection:'column'}}>
+            <div style={{maxWidth:"800px", margin:'20px auto', flexDirection:'column'}}>
             {props.cartItems && props.cartItems.length>0 && (
                 <Typography>
                 CART SUMMARY:
@@ -235,6 +237,7 @@ const Shop = (props) => {
                     <StyledTableCell align="right">Price (₹)</StyledTableCell>
                     <StyledTableCell align="right">Quantity </StyledTableCell>
                     <StyledTableCell align="right">Total Price</StyledTableCell>
+                    <StyledTableCell align="right">Discount</StyledTableCell>
                     <StyledTableCell align="right">Tax (CGST+SGST)</StyledTableCell>
                     <StyledTableCell align="right">Total Payable Amount</StyledTableCell>
                 </TableRow>
@@ -249,8 +252,9 @@ const Shop = (props) => {
                             <StyledTableCell align="right">₹{cartItem.price}/-</StyledTableCell>
                             <StyledTableCell align="right">{cartItem.quantity} </StyledTableCell>
                             <StyledTableCell align="right">₹{cartItem.totalPrice}/-</StyledTableCell>
+                            <StyledTableCell align="right">₹{cartItem.totalDiscount}/- @{cartItem.discount}%</StyledTableCell>
                             <StyledTableCell align="right">₹{(cartItem.CGST+cartItem.SGST).toFixed(2)}/- ({cartItem.tax}%)</StyledTableCell>
-                            <StyledTableCell align="right">₹{(cartItem.SGST+cartItem.CGST+cartItem.totalPrice).toFixed(2)}/-</StyledTableCell>
+                            <StyledTableCell align="right">₹{(cartItem.SGST+cartItem.CGST+cartItem.totalPrice-cartItem.totalDiscount).toFixed(2)}/-</StyledTableCell>
                             </StyledTableRow>
                         ))
                     }
@@ -261,6 +265,7 @@ const Shop = (props) => {
                             <StyledTableCell align="right"></StyledTableCell>
                             <StyledTableCell align="right"> </StyledTableCell>
                             <StyledTableCell align="right">₹{totalPrice.toFixed(2)}/-</StyledTableCell>
+                            <StyledTableCell align="right">₹{totalDiscount.toFixed(2)}/-</StyledTableCell>
                             <StyledTableCell align="right">₹{totalTax.toFixed(2)}/-</StyledTableCell>
                             <StyledTableCell align="right">₹{totalPayable.toFixed(2)}/-</StyledTableCell>
                     </StyledTableRow>
@@ -269,6 +274,7 @@ const Shop = (props) => {
                             </StyledTableCell>
                             <StyledTableCell align="right"></StyledTableCell>
                             <StyledTableCell align="right"> </StyledTableCell>
+                            <StyledTableCell align="right"></StyledTableCell>
                             <StyledTableCell align="right"></StyledTableCell>
                             <StyledTableCell align="right"></StyledTableCell>
                             <StyledTableCell align="right">

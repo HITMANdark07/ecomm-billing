@@ -32,6 +32,11 @@ const ManageAgents = (props) => {
     useEffect(() => {
         const subs = auth.onAuthStateChanged((user) => {
             if(user){
+                fs.collection("users").doc(user.uid).get().then(snapshot =>{
+                    if(snapshot && snapshot.data().role!=="admin"){
+                        history.goBack();
+                    }
+                })
                 getUsers();
             }else{
                 history.push("/");

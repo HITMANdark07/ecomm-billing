@@ -16,10 +16,10 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { addToCart, changetax, removefromCart, removeItemfromCart } from '../redux/cart/cart.action';
+import { addToCart, changeDiscount, changetax, removefromCart, removeItemfromCart } from '../redux/cart/cart.action';
 import {connect } from 'react-redux';
 
-function CartProduct({imageUrl,item, title,price,addCart, removeCart, removeItem, setTax}) {
+function CartProduct({imageUrl,item, title,price,addCart, removeCart, removeItem, setTax,setDiscount}) {
   return (
     <Card sx={{ width: 300,margin:'10px' }}>
       <CardMedia
@@ -39,12 +39,13 @@ function CartProduct({imageUrl,item, title,price,addCart, removeCart, removeItem
         ₹{price}/-
         </Typography>
       </CardContent>
-      <FormControl fullWidth>
+      <div style={{width:"100%"}}>
+      <FormControl style={{width:"50%"}}>
         <InputLabel id="demo-simple-select-label">Tax</InputLabel>
         <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
-            label="Age"
+            label="Tax"
             value={item.tax}
             onChange={(e) => {setTax({item, tax: e.target.value})}}
         >
@@ -53,6 +54,23 @@ function CartProduct({imageUrl,item, title,price,addCart, removeCart, removeItem
             <MenuItem value={18}>18%</MenuItem>
         </Select>
         </FormControl>
+        <FormControl style={{width:"50%"}}>
+        <InputLabel id="demo-simple-select-label2">Discount</InputLabel>
+        <Select
+            labelId="demo-simple-select-label2"
+            id="demo-simple-select2"
+            label="Discount"
+            value={item.discount}
+            onChange={(e) => {setDiscount({item, discount: e.target.value})}}
+        >
+            <MenuItem value={0}>0%</MenuItem>
+            <MenuItem value={5}>5%</MenuItem>
+            <MenuItem value={10}>10%</MenuItem>
+            <MenuItem value={15}>15%</MenuItem>
+            <MenuItem value={20}>20%</MenuItem>
+        </Select>
+        </FormControl>
+      </div>
       <CardActions>
           <Typography>
               Quantity:
@@ -98,6 +116,7 @@ const mapDispatchToProps = (dispatch) => ({
   addCart : item => dispatch(addToCart(item)),
   removeCart: item => dispatch(removefromCart(item)),
   removeItem: item => dispatch(removeItemfromCart(item)),
-  setTax : item => dispatch(changetax(item))
+  setTax : item => dispatch(changetax(item)),
+  setDiscount: item => dispatch(changeDiscount(item))
 })
 export default connect(null, mapDispatchToProps)(CartProduct);

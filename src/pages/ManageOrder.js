@@ -66,6 +66,7 @@ const ManageOrders = (props) => {
                     <TableCell align="right">Contact No.</TableCell>
                     <TableCell align="right">Date</TableCell>
                     <TableCell align="right">Total Price (₹)</TableCell>
+                    <TableCell align="right">Total Discount (₹)</TableCell>
                     <TableCell align="right">Total Tax (₹)</TableCell>
                     <TableCell align="center">Status</TableCell>
                     <TableCell align="center">Bill</TableCell>
@@ -113,6 +114,7 @@ function Row(props) {
           <TableCell align="right">+91 {row.phone}</TableCell>
           <TableCell align="right">{moment(row.date).format("DD/MM/YYYY")}</TableCell>
           <TableCell align="right">₹{row.totalPrice.toFixed(2)}/-</TableCell>
+          <TableCell align="right">₹{row.totalDiscount.toFixed(2)}/-</TableCell>
           <TableCell align="right">₹{row.totalTax.toFixed(2)}/-</TableCell>
           <TableCell align="left">
           <FormControl fullWidth>
@@ -122,13 +124,40 @@ function Row(props) {
                 id="demo-simple-select"
                 label="Status"
                 value={status}
-                // disabled={status==="DELIVERED" || status==="REFUNDED" || status==="CANCELED"}
+                disabled={status==="REFUNDED" || status==="CANCELED"}
                 onChange={updateStatus}
-                >
-                <MenuItem  value={"NOT PROCCESSED"}>NOT PROCCESSED</MenuItem>
-                <MenuItem  value={"DELIVERED"}>DELIVERED</MenuItem>
-                <MenuItem  value={"REFUNDED"}>REFUNDED</MenuItem>
-                <MenuItem  value={"CANCELED"}>CANCELED</MenuItem>
+                >{
+                  status==="DELIVERED" && 
+                  <MenuItem  value={"DELIVERED"}>DELIVERED</MenuItem>
+                }
+                {
+                  status==="REFUNDED" && 
+                  <MenuItem value={"REFUNDED"} >REFUNDED</MenuItem>
+                }
+                {
+                  status==="CANCELED" && 
+                  <MenuItem value={"CANCELED"} >CANCELED</MenuItem>
+                }
+                {
+                  status==="DELIVERED" && 
+                  <MenuItem  value={"REFUNDED"}>REFUNDED</MenuItem>
+                }
+                {
+                  status==="NOT PROCCESSED" &&
+                  <MenuItem  value={"NOT PROCCESSED"}>NOT PROCCESSED</MenuItem>
+                }
+                {
+                  status==="NOT PROCCESSED" &&
+                  <MenuItem  value={"DELIVERED"}>DELIVERED</MenuItem>
+                }
+                {
+                  status==="NOT PROCCESSED" &&
+                  <MenuItem  value={"REFUNDED"}>REFUNDED</MenuItem>
+                }
+                {
+                  status==="NOT PROCCESSED" &&
+                  <MenuItem  value={"CANCELED"}>CANCELED</MenuItem>
+                }
             </Select>
             </FormControl>
           </TableCell>
@@ -141,7 +170,7 @@ function Row(props) {
           </TableCell>
         </TableRow>
         <TableRow>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
             <Collapse in={open} timeout="auto" unmountOnExit>
               <Box sx={{ margin: 1 }}>
                 <Typography variant="h6" gutterBottom component="div">
@@ -154,6 +183,7 @@ function Row(props) {
                       <TableCell align="right">Price (₹)</TableCell>
                       <TableCell align="right">Quantity</TableCell>
                       <TableCell align="right">Total price (₹)</TableCell>
+                      <TableCell align="right">Discount (₹)</TableCell>
                       <TableCell align="right">CGST (₹)</TableCell>
                       <TableCell align="right">SGST (₹)</TableCell>
                       <TableCell align="right">Total tax (₹)</TableCell>
@@ -170,10 +200,13 @@ function Row(props) {
                         <TableCell align="right">
                         ₹{historyRow.totalPrice.toFixed(2)}/-
                         </TableCell>
-                        <TableCell align="right">₹{historyRow.CGST.toFixed(2)}/- ({historyRow.tax/2}%)</TableCell>
-                        <TableCell align="right">₹{historyRow.SGST.toFixed(2)}/- ({historyRow.tax/2}%)</TableCell>
                         <TableCell align="right">
-                        ₹{(historyRow.CGST+historyRow.SGST).toFixed(2)}/- ({historyRow.tax}%)
+                        ₹{historyRow.totalDiscount.toFixed(2)}/- @{historyRow.discount}%
+                        </TableCell>
+                        <TableCell align="right">₹{historyRow.CGST.toFixed(2)}/- @{historyRow.tax/2}%</TableCell>
+                        <TableCell align="right">₹{historyRow.SGST.toFixed(2)}/- @{historyRow.tax/2}%</TableCell>
+                        <TableCell align="right">
+                        ₹{(historyRow.CGST+historyRow.SGST).toFixed(2)}/- @{historyRow.tax}%
                         </TableCell>
                       </TableRow>
                     ))}

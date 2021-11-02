@@ -4,12 +4,15 @@ export const addItemToCart = (cartItems,item) => {
         return cartItems.map((carti) => carti.id === item.id ?{
             ...carti,
             quantity: carti.quantity+1,
-            totalPrice:(carti.quantity+1)*carti.price,
+            totalPrice:(Number)(((carti.quantity+1)*carti.price).toFixed(2)),
+            totalDiscount:(Number)(((((carti.quantity+1)*carti.price)*(carti.discount))/100).toFixed(2)),
             SGST: (Number)((((carti.quantity+1)*carti.price)*((carti.tax/100)/2)).toFixed(2)),
             CGST : (Number)((((carti.quantity+1)*carti.price)*((carti.tax/100)/2)).toFixed(2)),
         } : carti)
     }
-    return [...cartItems, {...item,quantity:1,tax:6, totalPrice:(Number)((item.price).toFixed(2)), CGST: (Number)(((item.price)*(0.06/2)).toFixed(2)),SGST:(Number)(((item.price)*(0.06/2)).toFixed(2))}]
+    return [...cartItems, {...item,quantity:1,tax:6,
+        discount:0, totalDiscount:0,
+         totalPrice:(Number)((item.price).toFixed(2)), CGST: (Number)(((item.price)*(0.06/2)).toFixed(2)),SGST:(Number)(((item.price)*(0.06/2)).toFixed(2))}]
 }
 
 export const removeItemfromCart = (cartItems,item) => {
@@ -21,7 +24,8 @@ export const removeItemfromCart = (cartItems,item) => {
      {
          ...cartitem,
          quantity:cartitem.quantity-1,
-         totalPrice:(cartitem.quantity-1)*cartitem.price,
+         totalPrice:(Number)(((cartitem.quantity-1)*cartitem.price).toFixed(2)),
+         totalDiscount:(Number)(((((cartitem.quantity-1)*cartitem.price)*(cartitem.discount))/100).toFixed(2)),
          SGST: (Number)((((cartitem.quantity-1)*cartitem.price)*((cartitem.tax/100)/2)).toFixed(2)),
          CGST : (Number)((((cartitem.quantity-1)*cartitem.price)*((cartitem.tax/100)/2)).toFixed(2)),
      }: cartitem);
@@ -38,4 +42,16 @@ export const changetaxCart = (cartItems,carttax) => {
         } : cartItem)
     }
     return [...cartItems]
+}
+
+export const changeDiscount = (cartItems, cartDiscount) => {
+    const existingItem = cartItems.find(cartitem => cartitem.id===cartDiscount.item.id);
+    if(existingItem){
+        return cartItems.map((cartitem) => cartitem.id===cartDiscount.item.id ? {
+            ...cartitem,
+            discount: cartDiscount.discount,
+            totalDiscount: Number((((cartitem.totalPrice)*(cartDiscount.discount))/100).toFixed(2)),
+        }: cartitem)
+    }
+    return [...cartItems];
 }

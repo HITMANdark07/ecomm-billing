@@ -23,6 +23,11 @@ export const clearCart = () => ({
         type: cartActionTypes.CLEAR_CART,
 })
 
+export const changeDiscount = (item) => ({
+        type:cartActionTypes.CHANGE_DISCOUNT,
+        payload:item
+})
+
 export const toggleDrawer = () => ({
         type: cartActionTypes.TOGGLE_DRAWER,
 })

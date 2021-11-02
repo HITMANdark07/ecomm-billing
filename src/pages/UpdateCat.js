@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import DashBoard from '../components/DashBoard';
 import { auth, fs } from '../firebase/index';
@@ -7,40 +7,34 @@ import Button from '@mui/material/Button';
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import makeToast from '../Toaster';
-import EditIcon from '@mui/icons-material/Edit';
 
-const ManageCategory = (props) => {
+const UpdateCat = (props) => {
     const {currentUser,history,setUser} = props;
+    const {catID} = props.match.params;
     const [title,setTitle] = useState("");
     const [description,setDescription] = useState("");
-    const [category, setCategory] = useState([]);
-    const getCategories = () => {
-        fs.collection("Categories").get().then(snapshot => {
-            const cats = [];
-            for(var snap of snapshot.docs){
-                cats.push({...snap.data(),id:snap.id});
+    const getCategory = useCallback(() => {
+        fs.collection("Categories").doc(catID).get().then(snapshot => {
+            if(snapshot){
+            const {title, description} = snapshot.data();
+            setTitle(title);
+            setDescription(description);
             }
-            setCategory(cats);
         }).catch(error => {
             makeToast("error", error.message);
         })
-    }
+    },[catID])
     useEffect(() => {
         const subs = auth.onAuthStateChanged((user) => {
             if(user){
-                getCategories();
+                getCategory();
             }else{
                 history.push("/");
             }
         });
         return () => subs;
-    },[history]);
+    },[history,getCategory]);
     const handleLogout=()=>{
         auth.signOut().then(()=>{
             setUser(null);
@@ -62,24 +56,22 @@ const ManageCategory = (props) => {
     const handleSubmit = (event) => {
         event.preventDefault();
         if(title && description){
-            fs.collection("Categories").add({
+            fs.collection("Categories").doc(catID).update({
                 title,
                 description
-            }).then(data => {
-                if(data){
-                    makeToast("success", "Category Added...");
+            }).then(() => {
+                    makeToast("success", "Category Updated...");
                     setTitle("");
                     setDescription("");
-                    getCategories();
-                }else{
-                    makeToast("error", "Failed");
-                }
+                    history.goBack();
+            }).catch((error) => {
+                makeToast("error", error.message);
             })
         }
     }
     return(
         <DashBoard logout={handleLogout} currentUserRole={ currentUser && currentUser.role}>
-            <h2 style={{textAlign:"center"}}>CREATE CATEGORY</h2>
+            <h2 style={{textAlign:"center"}}>UPDATE CATEGORY</h2>
             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }} style={{maxWidth:"700px", margin:" 0 auto"}}>
             <TextField
                 margin="normal"
@@ -110,36 +102,9 @@ const ManageCategory = (props) => {
                 sx={{ mt: 3, mb: 2 }}
                 startIcon={<AddBusinessIcon />}
             >
-                ADD CATEGORY
+                UPDATE CATEGORY
             </Button>
             </Box>
-            
-            {category.length>0 && <h2 style={{textAlign:"center"}}>CATEGORIES</h2>}
-            <div style={{maxWidth:"700px", margin:" 0 auto"}}>
-            {
-                category.map((cat,idx) => 
-                (<Accordion key={cat.id}>
-                <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id={`panel${idx}a-header`}
-                >
-                <Typography ><b>{cat.title}</b></Typography>
-                <Button
-                    variant="inherit"
-                    startIcon={<EditIcon/>}
-                    onClick={() => history.push(`/manage-category/${cat.id}`)}
-                >
-                </Button>
-                </AccordionSummary>
-                <AccordionDetails>
-                <Typography>
-                    {cat.description}
-                </Typography>
-                </AccordionDetails>
-            </Accordion>))
-            }
-            </div>
         </DashBoard>
     )
 }
@@ -149,4 +114,4 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
     setUser: user => dispatch(setCurrentUser(user))
 })
-export default connect(mapStateToProps,mapDispatchToProps)(ManageCategory);
+export default connect(mapStateToProps,mapDispatchToProps)(UpdateCat);

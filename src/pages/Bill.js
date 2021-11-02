@@ -27,12 +27,51 @@ const Bill = (props) => {
 		<>
         <div className="invoice-box">
 			<table cellPadding="0" cellSpacing="0">
-				<tr className="top">
+				<div style={{display:'flex', flexDirection:"row",justifyContent:"space-between"}}>
+					<div style={{display:'flex',flexDirection:'row'}}>
+						<div><img alt="business-logo" src={logo} style={{width: '100px', height:"100px"}} /></div>
+						<div style={{display:"flex",flexDirection:"column", justifyContent:"center"}}>
+							<div><b style={{color:"skyblue"}}>Ecommerce Billing Private Ltd.</b></div>
+							<div>GSTIN : XXXXXXXXXXXX</div>
+							<div>STATE : Andhra Pradesh(37)</div>
+							<div>PAN : XXXXXXXXXXXX</div>
+						</div>
+					</div>
+					<div style={{display:"flex",flexDirection:"column", justifySelf:"center"}}>
+					<div ><b>Total : ₹{order && order.totalPayable.toFixed(2)}/-</b></div>
+					<div>Invoice Date : {moment(order && order.date).format("DD/MM/YYYY")}</div>
+					<div>Invoice Time: {moment(order && order.date).format(" h:mm a")}</div>
+					<div>Invoice No. : {order && order.invoiceNumber}</div>
+					</div>
+				</div>
+				<hr/>
+				<div style={{display:'flex', flexDirection:"row",justifyContent:"space-between"}}>
+					<div style={{display:"flex",flexDirection:"column", justifySelf:"center"}}>
+						<div><b>Customer Name:</b></div>
+						<div>{order && order.name}</div>
+						<div><b>Contact No. :</b></div>
+						<div>+91 {order && order.phone}</div>
+					</div>
+					<div style={{display:"flex",flexDirection:"column", justifySelf:"center"}}>
+						<div><b>Billing Address:</b></div>
+						<div>XXXXXX Lane Road</div>
+						<div>X249- plot 345 XXXXXX</div>
+						<div>Andhra Pradesh</div>
+					</div>
+					<div style={{display:"flex",flexDirection:"column", justifySelf:"center"}}>
+						<div><b>Shipping Address:</b></div>
+						<div>XXXXXX Lane Road</div>
+						<div>X249- plot 345 XXXXXX</div>
+						<div>Andhra Pradesh</div>
+					</div>
+				</div>
+				<hr/>
+				{/* <tr className="top">
 					<td colSpan="2">
 						<table>
 							<tr>
 								<td className="title">
-									<img alt="business-logo" src={logo} style={{width: '100%', maxWidth: '300px'}} />
+									<img alt="business-logo" src={logo} style={{width: '100%', maxWidth: '100px'}} />
 
 								</td>
 
@@ -44,9 +83,9 @@ const Bill = (props) => {
 							</tr>
 						</table>
 					</td>
-				</tr>
+				</tr> */}
 
-				<tr className="information">
+				{/* <tr className="information">
 					<td colSpan="4">
 						<table>
 							<tr>
@@ -64,7 +103,7 @@ const Bill = (props) => {
 							</tr>
 						</table>
 					</td>
-				</tr>
+				</tr> */}
 			</table>
 			<table>
 				<thead>
@@ -84,9 +123,10 @@ const Bill = (props) => {
 				<thead>
 					<tr className="heading">
 						<td>Product</td>
-						<td>Price</td>
+						<td>Price (₹)</td>
 						<td align="right">Quantity</td>
 						<td align="right">Total Price (₹)</td>
+						<td align="right">Discount (₹)</td>
 						<td align="right">SGST (₹)</td>
 						<td align="right">CGST (₹)</td>
 						<td align="right">Total Payable Amount (₹)</td>
@@ -101,21 +141,43 @@ const Bill = (props) => {
 								<td>₹{product.price.toFixed(2)}/-</td>
 								<td align="right">{product.quantity}</td>
 								<td align="right">₹{product.totalPrice.toFixed(2)}/-</td>
-								<td align="right">₹{product.CGST.toFixed(2)}/- ({(product.tax/2)+"%"})</td>
-								<td align="right">₹{product.SGST.toFixed(2)}/- ({(product.tax/2)+"%"})</td>
-								<td align="right">₹{(product.SGST+product.CGST+product.totalPrice).toFixed(2)}/-</td>
+								<td align="right">₹{product.totalDiscount.toFixed(2)}/- @{(product.discount)+"%"}</td>
+								<td align="right">₹{product.CGST.toFixed(2)}/- @{(product.tax/2)+"%"}</td>
+								<td align="right">₹{product.SGST.toFixed(2)}/- @{(product.tax/2)+"%"}</td>
+								<td align="right">₹{(product.SGST+product.CGST+product.totalPrice-product.totalDiscount).toFixed(2)}/-</td>
 							</tr>
 						))
 					}
 				</tbody>
 				<tfoot>
 					<tr className="heading">
-						<td colSpan="4"><b>Total:</b></td>
-						<td colSpan="2" align="left">(Total Tax): ₹{order && order.totalTax.toFixed(2)}/-   </td>
+						<td colSpan="5"><b>Total:</b></td>
+						<td colSpan="2" align="center">₹{order && order.totalTax.toFixed(2)}/-   </td>
 						<td align="right">₹{order && order.totalPayable.toFixed(2)}/-</td>
 					</tr>
 				</tfoot>
 			</table>
+			<table>
+				<tbody>
+					<tr>
+						<td colSpan="7" align="right">Total Price(exclusive of GST):</td>
+						<td colSpan="1">₹{order && order.totalPrice.toFixed(2)}/-</td>
+					</tr>
+					<tr>
+						<td colSpan="7" align="right">Total Tax(SGST+CGST):</td>
+						<td colSpan="1">₹{order && order.totalTax.toFixed(2)}/-</td>
+					</tr>
+					<tr>
+						<td colSpan="7" align="right">Total Discount(₹):</td>
+						<td colSpan="1">₹{order && order.totalDiscount.toFixed(2)}/-</td>
+					</tr>
+					<tr className="heading">
+						<td colSpan="7" align="right">Total Payable Amount(₹):</td>
+						<td colSpan="1">₹{order && order.totalPayable.toFixed(2)}/-</td>
+					</tr>
+				</tbody>
+			</table>
+			<br/>
 			<div style={{marginTop:"50px", display:'flex',flexDirection:'row', justifyContent:"space-between"}}>
 					<div><u>customer sign.</u></div>
 					<div><u>Merchant sign.</u></div>
