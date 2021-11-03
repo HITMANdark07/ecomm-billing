@@ -10,6 +10,7 @@ import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CircularProgress from '@mui/material/CircularProgress';
 import { auth, fs } from '../firebase/index';
 import { Redirect } from "react-router-dom";
 import { setCurrentUser } from '../redux/user/user.action';
@@ -32,22 +33,29 @@ function Copyright(props) {
 const theme = createTheme();
 
 function SignInSide({setCurrentUser, currentUser}) {
+  const [loading, setLoading] = React.useState(false);
   const handleSubmitLogin = (event) => {
     event.preventDefault();
+    setLoading(true);
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
     auth.signInWithEmailAndPassword(data.get("email"),data.get("password")).then((user)=>{
-        fs.collection("users").doc(user.uid).get().then(async snapshot => {
-              var role = await snapshot.data() && snapshot.data().role;
-              if(role!=="user"){
-                setCurrentUser({...snapshot.data(),id:snapshot.id});
-              }else{
-                makeToast("warning", "Contact Admin to Login")
-              }
-        })
+        if(user){
+          fs.collection("users").doc(user.uid).get().then(snapshot => {
+            var role = snapshot.data() && snapshot.data().role;
+            console.log(snapshot.data())
+            setLoading(false);
+            if(role==="staff" || role==="admin"){
+              setCurrentUser({...snapshot.data(),id:snapshot.id});
+            }
+      }).catch(() => {
+        makeToast("warning", "Contact Admin to Login");
+      })
+        }
 
     }).catch(error=>{
         makeToast("error", error.message);
+        setLoading(false);
     });
   }
 
@@ -108,10 +116,14 @@ function SignInSide({setCurrentUser, currentUser}) {
                 id="password"
                 autoComplete="current-password"
               />
+              { loading && (<div style={{textAlign:"center"}}>
+                <CircularProgress/>
+              </div>)}
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
+                disabled={loading}
                 sx={{ mt: 3, mb: 2 }}
               >
                 Sign In

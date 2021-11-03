@@ -22,6 +22,7 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import { setCurrentUser } from '../redux/user/user.action';
 import makeToast from '../Toaster';
+import CircularProgress from '@mui/material/CircularProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import moment from 'moment';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -33,6 +34,8 @@ const ManageProducts = (props) => {
     const [products, setProducts] = useState([]);
     const [title, setTitle] = useState("");
     const [description,setDescription] = useState("");
+    const [loading, setLoading] = React.useState(true);
+    const [addLoading, setAddLoading]  = useState(false);
     const [price, setPrice] = useState("");
     const [progress, setProgress] = useState(0);
     const [category,setCategory] = useState("");
@@ -56,8 +59,10 @@ const ManageProducts = (props) => {
                 pros.push({...snap.data(),id:snap.id});
             }
             setProducts(pros);
+            setLoading(false);
         }).catch(error => {
             makeToast("error", error.message);
+            setLoading(false);
         })
     }
     const handleChange = (event, name) => {
@@ -108,6 +113,7 @@ const ManageProducts = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -131,13 +137,14 @@ const ManageProducts = (props) => {
       }));
     const handleSubmit =(event) => {
         event.preventDefault();
+        setAddLoading(true);
         if(image!==null){
             //saving product to database
         const uploadTask=storage.ref(`product-images/${image.name}`).put(image);
         uploadTask.on('state_changed',snapshot=>{
             const progress = (snapshot.bytesTransferred/snapshot.totalBytes)*100
             setProgress(progress);
-        },error=>makeToast("error",error.message),()=>{
+        },error=>{makeToast("error",error.message); setAddLoading(false);},()=>{
             storage.ref('product-images').child(image.name).getDownloadURL().then(url=>{
                 fs.collection('Products').add({
                     title,
@@ -152,16 +159,21 @@ const ManageProducts = (props) => {
                     setTitle('');
                     setDescription('');
                     setPrice('');
+                    setAddLoading(false);
                     setProgress(0);
                     setImage(null);
                     setCategory(cat && cat[0].title);
                     getProducts();
                     document.getElementById('contained-button-file').value='';
-                }).catch(error=>makeToast("error",error.message));
+                }).catch(error=>{
+                    makeToast("error",error.message);
+                    setAddLoading(false);
+                });
             })
         })
         }else{
             makeToast("warning","please add an image...")
+            setAddLoading(false);
         }
     }
     const deleteProduct = (id) => {
@@ -229,18 +241,25 @@ const ManageProducts = (props) => {
             Upload
         </Button>
         </label>
+        {addLoading && <div style={{textAlign:"center", marginTop:40}}>
+        <CircularProgress/>
+        </div>}
 
         <Button
             type="submit"
             fullWidth
             variant="contained"
+            disabled={addLoading}
             sx={{ mt: 3, mb: 2 }}
             startIcon={<AddBusinessIcon />}
         >
-            ADD PRODUCT
+            {addLoading ? "ADDING..." : "ADD"} PRODUCT
         </Button>
         </Box>
-        <TableContainer component={Paper} style={{maxWidth:"800px", margin:"20px auto"}}>
+        { loading ? (<div style={{textAlign:"center", marginTop:40}}>
+        <CircularProgress/>
+        </div>):(
+            <TableContainer component={Paper} style={{maxWidth:"800px", margin:"20px auto"}}>
             <Table sx={{ maxWidth: "800px" }} aria-label="customized table">
                 <TableHead>
                 <TableRow>
@@ -289,6 +308,8 @@ const ManageProducts = (props) => {
                 </TableBody>
             </Table>
             </TableContainer>
+        )}
+        
         </DashBoard>
     )
 }

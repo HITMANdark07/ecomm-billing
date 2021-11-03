@@ -13,11 +13,13 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import makeToast from '../Toaster';
+import CircularProgress from '@mui/material/CircularProgress';
 import { Redirect } from 'react-router';
 
 const ManageAgents = (props) => {
     const {currentUser,history,setUser} = props;
     const [users, setUsers] = useState([]);
+    const [loading, setLoading] = React.useState(true);
     const getUsers = () => {
         fs.collection("users").get().then(snapshot => {
             if(snapshot){
@@ -26,7 +28,10 @@ const ManageAgents = (props) => {
                     usr.push({...snap.data(),id:snap.id});
                 }
                 setUsers(usr);
+                setLoading(false);
             }
+        }).catch(() => {
+            setLoading(false);
         })
     }
     useEffect(() => {
@@ -48,6 +53,7 @@ const ManageAgents = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -65,25 +71,30 @@ const ManageAgents = (props) => {
         <DashBoard logout={handleLogout} currentUserRole={ currentUser && currentUser.role}>
             <h2 style={{textAlign:"center"}}>MANAGE STAFFS</h2>
             {currentUser && currentUser.role==="staff" && <Redirect to="/" />}
-            <TableContainer component={Paper} sx={{maxWidth:800, margin:'20px auto'}}>
-            <Table sx={{ maxWidth: 800 }} aria-label="customized table">
-                <TableHead>
-                <TableRow>
-                    <StyledTableCell>Email</StyledTableCell>
-                    <StyledTableCell align="right">Name</StyledTableCell>
-                    <StyledTableCell align="right">Request</StyledTableCell>
-                    <StyledTableCell align="right">Role</StyledTableCell>
-                    <StyledTableCell align="right">Edit</StyledTableCell>
-                </TableRow>
-                </TableHead>
-                <TableBody>
-                {users && users.map((user) => (
-                        <Row user={user} key={user.id} />
-                    )
-                )}
-                </TableBody>
-            </Table>
-            </TableContainer>
+            { loading ? (<div style={{textAlign:"center", marginTop:70}}>
+                <CircularProgress/>
+              </div>): (
+                  <TableContainer component={Paper} sx={{maxWidth:800, margin:'20px auto'}}>
+                  <Table sx={{ maxWidth: 800 }} aria-label="customized table">
+                      <TableHead>
+                      <TableRow>
+                          <StyledTableCell>Email</StyledTableCell>
+                          <StyledTableCell align="right">Name</StyledTableCell>
+                          <StyledTableCell align="right">Request</StyledTableCell>
+                          <StyledTableCell align="right">Role</StyledTableCell>
+                          <StyledTableCell align="right">Edit</StyledTableCell>
+                      </TableRow>
+                      </TableHead>
+                      <TableBody>
+                      {users && users.map((user) => (
+                              <Row user={user} key={user.id} />
+                          )
+                      )}
+                      </TableBody>
+                  </Table>
+                  </TableContainer>
+              )}
+            
         </DashBoard>
     )
 }

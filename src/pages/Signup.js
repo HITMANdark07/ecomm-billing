@@ -7,6 +7,7 @@ import {Link} from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import CircularProgress from '@mui/material/CircularProgress';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -29,22 +30,26 @@ function Copyright(props) {
 const theme = createTheme();
 
 function SignUpSide(props) {
+  const [loading, setLoading] = React.useState(false);
   const handleSubmit = (event) => {
     event.preventDefault();
+    setLoading(true);
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
     if(data.get("email") && data.get("password") && data.get("name")){
       auth.createUserWithEmailAndPassword(data.get("email"),data.get("password")).then((credentials)=>{
+        setLoading(false);
         fs.collection('users').doc(credentials.user.uid).set({
             FullName: data.get("name"),
             Email: data.get("email"),
             role: 'user'
         }).then(()=>{
-          makeToast("warning", "Contact Admin to Login")
+          makeToast("warning", "Account Created. Contact admin for authorization.")
             props.history.push("/");
         }).catch(error=>console.log(error.message));
     }).catch((error)=>{
-        makeToast("error", error.message)
+        makeToast("error", error.message);
+        setLoading(false);
     })
     }
   };
@@ -113,10 +118,14 @@ function SignUpSide(props) {
                 id="password"
                 autoComplete="current-password"
               />
+              { loading && (<div style={{textAlign:"center"}}>
+                <CircularProgress/>
+              </div>)}
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
+                disabled={loading}
                 sx={{ mt: 3, mb: 2 }}
               >
                 CREATE ACCOUNT

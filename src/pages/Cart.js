@@ -16,6 +16,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper'
 import ModalUnstyled from '@mui/core/ModalUnstyled';
 import CartProduct from '../components/CartProduct';
+import CircularProgress from '@mui/material/CircularProgress';
 import { FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import makeToast from '../Toaster';
 import { clearCart } from '../redux/cart/cart.action';
@@ -23,6 +24,7 @@ import { clearCart } from '../redux/cart/cart.action';
 const Shop = (props) => {
     const {currentUser,history,setUser} = props;
     const [open, setOpen] = useState(false);
+    const [orderLoading, setOrderLoading] = useState(false);
     const [orderlength, setOrderLength] = useState(0);
     const [payment, setPayment] = useState("CASH");
     const handleClose= () => {
@@ -103,6 +105,7 @@ const Shop = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const totalTax = props.cartItems.reduce((acc,emm) => acc+(emm.CGST+emm.SGST),0);
@@ -130,6 +133,7 @@ const Shop = (props) => {
       }));
       const placeOrder = event => {
         event.preventDefault();
+        setOrderLoading(true);
         const data = new FormData(event.currentTarget);
         if(data.get("name") && data.get("phone")){
             fs.collection("Orders").add({
@@ -147,12 +151,17 @@ const Shop = (props) => {
             }).then((data) =>{
                 if(data){
                     props.emptyCart();
+                    setOrderLoading(false);
                     setOpen(false);
                     makeToast("success", "Order Placed...");
                 }else{
-                    makeToast("error", "Order Processing Failed.")
+                    makeToast("error", "Order Processing Failed.");
+                    setOrderLoading(false);
                 }
             })
+        }else{
+            makeToast("warning", "All fields are required");
+            setOrderLoading(false);
         }
       }
 
@@ -201,14 +210,18 @@ const Shop = (props) => {
             name="phone"
             autoComplete="phone"
         />
+        { orderLoading && (<div style={{textAlign:"center"}}>
+        <CircularProgress/>
+        </div>)}
         <Button
             type="submit"
             fullWidth
             variant="contained"
+            disabled={orderLoading}
             sx={{ mt: 3, mb: 2 }}
             startIcon={<SendIcon />}
         >
-            PLACE ORDER
+            {orderLoading ? "PLACING...": "PLACE"} ORDER
         </Button>
         </Box>
       </StyledModal>

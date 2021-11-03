@@ -17,6 +17,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { addToCart, changeDiscount, changetax, removefromCart, removeItemfromCart } from '../redux/cart/cart.action';
+import { TAX, DISCOUNT } from "../utils/index";
 import {connect } from 'react-redux';
 
 function CartProduct({imageUrl,item, title,price,addCart, removeCart, removeItem, setTax,setDiscount}) {
@@ -49,9 +50,11 @@ function CartProduct({imageUrl,item, title,price,addCart, removeCart, removeItem
             value={item.tax}
             onChange={(e) => {setTax({item, tax: e.target.value})}}
         >
-            <MenuItem value={6}>6%</MenuItem>
-            <MenuItem value={12}>12%</MenuItem>
-            <MenuItem value={18}>18%</MenuItem>
+            {
+              TAX.map((tax,idx) => (
+                <MenuItem key={idx} value={tax}>{tax}%</MenuItem>
+              ))
+            }
         </Select>
         </FormControl>
         <FormControl style={{width:"50%"}}>
@@ -63,11 +66,11 @@ function CartProduct({imageUrl,item, title,price,addCart, removeCart, removeItem
             value={item.discount}
             onChange={(e) => {setDiscount({item, discount: e.target.value})}}
         >
-            <MenuItem value={0}>0%</MenuItem>
-            <MenuItem value={5}>5%</MenuItem>
-            <MenuItem value={10}>10%</MenuItem>
-            <MenuItem value={15}>15%</MenuItem>
-            <MenuItem value={20}>20%</MenuItem>
+            {
+              DISCOUNT.map((discount,idx) => (
+                <MenuItem key={idx} value={discount}>{discount}%</MenuItem>
+              ))
+            }
         </Select>
         </FormControl>
       </div>

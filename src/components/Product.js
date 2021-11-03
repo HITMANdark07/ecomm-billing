@@ -10,6 +10,7 @@ import { addToCart } from '../redux/cart/cart.action';
 import {connect } from 'react-redux';
 
 function Product({imageUrl,item, title,description,price,addCart}) {
+  const [added, setAdded] = React.useState(false);
   
   return (
     <Card sx={{ width: 300,margin:'10px' }}>
@@ -33,13 +34,17 @@ function Product({imageUrl,item, title,description,price,addCart}) {
       </CardContent>
       <CardActions>
       <LoadingButton
-        onClick={() => addCart(item)}
+        onClick={() => {
+          addCart(item);
+          setAdded(true);
+        }}
         endIcon={<AddShoppingCartIcon />}
         loading={false}
         loadingPosition="end"
         variant="contained"
+        disabled={added}
       >
-        ADD TO CART
+        {added ? "ADDED" : "ADD"} TO CART
       </LoadingButton>
       </CardActions>
     </Card>

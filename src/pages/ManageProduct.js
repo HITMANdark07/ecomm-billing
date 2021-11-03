@@ -11,6 +11,7 @@ import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import { auth, fs, storage } from '../firebase/index';
 import { setCurrentUser } from '../redux/user/user.action';
+import CircularProgress from '@mui/material/CircularProgress';
 import makeToast from '../Toaster';
 import { InputLabel, LinearProgress } from '@mui/material';
 
@@ -21,6 +22,7 @@ const ManageProduct = (props) => {
     const [title, setTitle] = useState("");
     const [description,setDescription] = useState("");
     const [price, setPrice] = useState("");
+    const [addLoading, setAddLoading]  = useState(false);
     const [progress, setProgress] = useState(0);
     const [category,setCategory] = useState("");
     const [image,setImage] = useState(null);
@@ -95,10 +97,12 @@ const ManageProduct = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const handleUpdate = (e) => {
         e.preventDefault();
+        setAddLoading(true);
         if(image!==null){
         const uploadTask=storage.ref(`product-images/${image.name}`).put(image);
         uploadTask.on('state_changed',snapshot=>{
@@ -106,6 +110,7 @@ const ManageProduct = (props) => {
             setProgress(progress);
         },error=>{
             makeToast("error", error.message);
+            setAddLoading(false);
         },()=>{
             storage.ref('product-images').child(image.name).getDownloadURL().then(url=>{
                 fs.collection('Products').doc(productID).update({
@@ -119,10 +124,12 @@ const ManageProduct = (props) => {
                     makeToast("success", "Product Updated");
                     getProduct();
                     setProgress(0);
+                    setAddLoading(false);
                     setImage(null);
                     document.getElementById('contained-button-file').value='';
                 }).catch(error=>{
                     makeToast("error", error.message);
+                    setAddLoading(false);
                 });
             })
         })
@@ -136,11 +143,13 @@ const ManageProduct = (props) => {
             }).then(() => {
                 makeToast("success", "Product Updated");
                 setImage(null);
+                setAddLoading(false);
                 getProduct();
                 setProgress(0);
                 document.getElementById('contained-button-file').value='';
             }).catch(error=>{
                 makeToast("error", error.message);
+                setAddLoading(false);
             });
         }
     }
@@ -200,15 +209,19 @@ const ManageProduct = (props) => {
             Upload
         </Button>
         </label>
+        {addLoading && <div style={{textAlign:"center", marginTop:40}}>
+        <CircularProgress/>
+        </div>}
 
         <Button
             type="submit"
             fullWidth
             variant="contained"
+            disabled={addLoading}
             sx={{ mt: 3, mb: 2 }}
             startIcon={<AddBusinessIcon />}
         >
-            UPDATE PRODUCT
+            {addLoading ? "UPDATING..." : "UPDATE"} PRODUCT
         </Button>
         </Box>
         </DashBoard>

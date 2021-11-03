@@ -6,6 +6,7 @@ import { setCurrentUser } from '../redux/user/user.action';
 import Button from '@mui/material/Button';
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
 import makeToast from '../Toaster';
 
@@ -13,6 +14,7 @@ const UpdateCat = (props) => {
     const {currentUser,history,setUser} = props;
     const {catID} = props.match.params;
     const [title,setTitle] = useState("");
+    const [addLoading, setAddLoading]  = useState(false);
     const [description,setDescription] = useState("");
     const getCategory = useCallback(() => {
         fs.collection("Categories").doc(catID).get().then(snapshot => {
@@ -39,6 +41,7 @@ const UpdateCat = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const handleChange = (event,name) =>{
@@ -54,6 +57,7 @@ const UpdateCat = (props) => {
         }
     }
     const handleSubmit = (event) => {
+        setAddLoading(true);
         event.preventDefault();
         if(title && description){
             fs.collection("Categories").doc(catID).update({
@@ -62,10 +66,12 @@ const UpdateCat = (props) => {
             }).then(() => {
                     makeToast("success", "Category Updated...");
                     setTitle("");
+                    setAddLoading(false);
                     setDescription("");
                     history.goBack();
             }).catch((error) => {
                 makeToast("error", error.message);
+                setAddLoading(false);
             })
         }
     }
@@ -94,15 +100,18 @@ const UpdateCat = (props) => {
                 label="Category Description"
                 name="description"
             />
-
+            {addLoading && <div style={{textAlign:"center", marginTop:40}}>
+            <CircularProgress/>
+            </div>}
             <Button
                 type="submit"
                 fullWidth
                 variant="contained"
+                disabled={addLoading}
                 sx={{ mt: 3, mb: 2 }}
                 startIcon={<AddBusinessIcon />}
             >
-                UPDATE CATEGORY
+                {addLoading ? "UPDATING..." : "UPDATE"} CATEGORY
             </Button>
             </Box>
         </DashBoard>

@@ -29,11 +29,12 @@ function App(props) {
         if(user){
           fs.collection("users").doc(user.uid).get().then(async snapshot => {
             var role = await snapshot.data() && snapshot.data().role;
-            if(role!=="user"){
+            if(role==="staff" || role==="admin"){
               setUser({...snapshot.data(),id:snapshot.id});
             }else{
               auth.signOut().then(()=>{
                 setUser(null);
+                console.log("run here1");
                 makeToast("warning", "Contact Admin to Login")
             })
             }
@@ -44,6 +45,7 @@ function App(props) {
     if(currentUsr && currentUsr.role==="user"){
           auth.signOut().then(()=>{
             setUser(null);
+        console.log("run here2");
             makeToast("warning", "Contact Admin to Login")
         })
     }

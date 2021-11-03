@@ -11,6 +11,7 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import Box from '@mui/material/Box';
 import { TextField } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import moment from 'moment';
 import CanvasJSReact from '../assets/canvasjs.react';
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -20,6 +21,7 @@ const SalesReport = (props) => {
     const [orders, setOrders] = useState([]);
     const [date1, setDate1] = useState(Date.now());
     const [date2, setDate2] = useState(Date.now());
+    const [loading, setLoading] = React.useState(true);
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [chartData, setChartData] = useState([]);
     const [value, setValue] = React.useState([null, null]);
@@ -30,8 +32,10 @@ const SalesReport = (props) => {
                     ord.push({...snap.data(), id:snap.id});
                 }
                 setOrders(ord);
+                setLoading(false);
         }).catch(error => {
             makeToast("error", error.message);
+            setLoading(false);
         })
     }
     useEffect(() => {
@@ -49,6 +53,7 @@ const SalesReport = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const generateReport = useCallback((d1,d2) => {
@@ -110,6 +115,9 @@ const SalesReport = (props) => {
             {currentUser && currentUser.role==="staff" && <Redirect to="/" />}
             <div className="invoice-box">
                 <div style={{margin:'10px auto',textAlign:"center"}}><h3>SALES REPORT</h3></div>
+                { loading && (<div style={{textAlign:"center", marginTop:70}}>
+                <CircularProgress/>
+              </div>)}
                 <table>
                     <thead>
                         <tr className="heading">

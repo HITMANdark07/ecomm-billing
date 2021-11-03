@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
+import CircularProgress from '@mui/material/CircularProgress';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -18,6 +19,8 @@ import EditIcon from '@mui/icons-material/Edit';
 const ManageCategory = (props) => {
     const {currentUser,history,setUser} = props;
     const [title,setTitle] = useState("");
+    const [loading, setLoading] = React.useState(true);
+    const [addLoading, setAddLoading] = useState(false);
     const [description,setDescription] = useState("");
     const [category, setCategory] = useState([]);
     const getCategories = () => {
@@ -27,8 +30,10 @@ const ManageCategory = (props) => {
                 cats.push({...snap.data(),id:snap.id});
             }
             setCategory(cats);
+            setLoading(false);
         }).catch(error => {
             makeToast("error", error.message);
+            setLoading(false);
         })
     }
     useEffect(() => {
@@ -45,6 +50,7 @@ const ManageCategory = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const handleChange = (event,name) =>{
@@ -60,6 +66,7 @@ const ManageCategory = (props) => {
         }
     }
     const handleSubmit = (event) => {
+        setAddLoading(true);
         event.preventDefault();
         if(title && description){
             fs.collection("Categories").add({
@@ -68,11 +75,13 @@ const ManageCategory = (props) => {
             }).then(data => {
                 if(data){
                     makeToast("success", "Category Added...");
+                    setAddLoading(false);
                     setTitle("");
                     setDescription("");
                     getCategories();
                 }else{
                     makeToast("error", "Failed");
+                    setAddLoading(false);
                 }
             })
         }
@@ -102,19 +111,27 @@ const ManageCategory = (props) => {
                 label="Category Description"
                 name="description"
             />
+            {addLoading && <div style={{textAlign:"center", marginTop:40}}>
+            <CircularProgress/>
+            </div>}
+
 
             <Button
                 type="submit"
                 fullWidth
                 variant="contained"
+                disabled={addLoading}
                 sx={{ mt: 3, mb: 2 }}
                 startIcon={<AddBusinessIcon />}
             >
-                ADD CATEGORY
+                {addLoading ? "ADDING..." : "ADD"} CATEGORY
             </Button>
             </Box>
             
             {category.length>0 && <h2 style={{textAlign:"center"}}>CATEGORIES</h2>}
+            { loading && (<div style={{textAlign:"center", marginTop:40}}>
+            <CircularProgress/>
+            </div>)}
             <div style={{maxWidth:"700px", margin:" 0 auto"}}>
             {
                 category.map((cat,idx) => 

@@ -14,6 +14,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 import Paper from '@mui/material/Paper';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -25,6 +26,7 @@ import moment from 'moment';
 const ManageOrders = (props) => {
     const {currentUser,history,setUser} = props;
     const [orders, setOrder] = useState([]);
+    const [loading, setLoading] = React.useState(true);
     const getOrders = () => {
         fs.collection("Orders").get().then(snapshot => {
                 var ord=[];
@@ -32,8 +34,10 @@ const ManageOrders = (props) => {
                     ord.push({...snap.data(), id:snap.id});
                 }
                 setOrder(ord);
+                setLoading(false);
         }).catch(error => {
             makeToast("error", error.message);
+            setLoading(false);
         })
     }
     useEffect(() => {
@@ -50,6 +54,7 @@ const ManageOrders = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const ord = _.sortBy(orders,"date").reverse();
@@ -57,28 +62,33 @@ const ManageOrders = (props) => {
     return(
         <DashBoard logout={handleLogout} currentUserRole={ currentUser && currentUser.role}>
             <h2 style={{textAlign:"center"}}>MANAGE ORDERS</h2>
-            <TableContainer component={Paper} style={{margin:"5px auto"}}>
-            <Table aria-label="collapsible table">
-                <TableHead>
-                <TableRow>
-                    <TableCell />
-                    <TableCell>Customer Name</TableCell>
-                    <TableCell align="right">Contact No.</TableCell>
-                    <TableCell align="right">Date</TableCell>
-                    <TableCell align="right">Total Price (₹)</TableCell>
-                    <TableCell align="right">Total Discount (₹)</TableCell>
-                    <TableCell align="right">Total Tax (₹)</TableCell>
-                    <TableCell align="center">Status</TableCell>
-                    <TableCell align="center">Bill</TableCell>
-                    </TableRow>
-                    </TableHead>
-                    <TableBody>
-                {ord.map((order) => (
-                    <Row history={history} key={order.id} row={order} />
-                ))}
-                </TableBody>
-            </Table>
-            </TableContainer>
+            { loading ? (<div style={{textAlign:"center", marginTop:40}}>
+            <CircularProgress/>
+            </div>):(
+              <TableContainer component={Paper} style={{margin:"5px auto"}}>
+              <Table aria-label="collapsible table">
+                  <TableHead>
+                  <TableRow>
+                      <TableCell />
+                      <TableCell>Customer Name</TableCell>
+                      <TableCell align="right">Contact No.</TableCell>
+                      <TableCell align="right">Date</TableCell>
+                      <TableCell align="right">Total Price (₹)</TableCell>
+                      <TableCell align="right">Total Discount (₹)</TableCell>
+                      <TableCell align="right">Total Tax (₹)</TableCell>
+                      <TableCell align="center">Status</TableCell>
+                      <TableCell align="center">Bill</TableCell>
+                      </TableRow>
+                      </TableHead>
+                      <TableBody>
+                  {ord.map((order) => (
+                      <Row history={history} key={order.id} row={order} />
+                  ))}
+                  </TableBody>
+              </Table>
+              </TableContainer>
+            )}
+            
         </DashBoard>
     )
 }

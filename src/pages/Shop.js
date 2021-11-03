@@ -8,9 +8,11 @@ import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import Product from '../components/Product';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Shop = (props) => {
     const {currentUser,history,setUser} = props;
+    const [loading, setLoading] = React.useState(true);
     const [products, setProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
      useEffect(() => {
@@ -24,6 +26,7 @@ const Shop = (props) => {
                     }
                     if(snapshot.docs.length===productsArray.length){
                         setProducts(productsArray);
+                        setLoading(false);
                     }
                 })
             }else{
@@ -36,18 +39,18 @@ const Shop = (props) => {
         auth.signOut().then(()=>{
             setUser(null);
             history.push('/');
+            window.location.reload();
         })
     }
     const searchHandler = (event) => {
         event.preventDefault();
         setSearchTerm(event.target.value);
     }
-    const filteredProducts = products.filter((pro) => pro.title.toLowerCase().includes(searchTerm));
+    const filteredProducts = products.filter((pro) => pro.title.toLowerCase().includes(searchTerm.toLowerCase()));
     return(
         <Dashboard logout={handleLogout} currentUserRole={ currentUser && currentUser.role}>
             <div style={{margin:' 0 auto'}}>
             <Paper
-                component="form"
                 sx={{ p: '2px 4px', display: 'flex', alignItems: 'center',marginLeft:'10%', width: "80%" , marginTop:"20px"}}
                 >
                 <InputBase
@@ -61,6 +64,9 @@ const Shop = (props) => {
                 </IconButton>
             </Paper>
             </div>
+            { loading && (<div style={{textAlign:"center", marginTop:100}}>
+                <CircularProgress/>
+              </div>)}
             <div>
                 <div style={{display:'flex',flexDirection:"row",flexWrap:'wrap', justifyContent:'space-around'}}>
                 {filteredProducts.map((pro) => (

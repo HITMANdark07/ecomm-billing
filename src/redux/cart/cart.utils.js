@@ -6,8 +6,8 @@ export const addItemToCart = (cartItems,item) => {
             quantity: carti.quantity+1,
             totalPrice:(Number)(((carti.quantity+1)*carti.price).toFixed(2)),
             totalDiscount:(Number)(((((carti.quantity+1)*carti.price)*(carti.discount))/100).toFixed(2)),
-            SGST: (Number)((((carti.quantity+1)*carti.price)*((carti.tax/100)/2)).toFixed(2)),
-            CGST : (Number)((((carti.quantity+1)*carti.price)*((carti.tax/100)/2)).toFixed(2)),
+            SGST: (Number)(((((carti.quantity+1)*carti.price)-((((carti.quantity+1)*carti.price)*(carti.discount))/100))*((carti.tax/100)/2)).toFixed(2)),
+            CGST : (Number)(((((carti.quantity+1)*carti.price)-((((carti.quantity+1)*carti.price)*(carti.discount))/100))*((carti.tax/100)/2)).toFixed(2)),
         } : carti)
     }
     return [...cartItems, {...item,quantity:1,tax:6,
@@ -26,8 +26,8 @@ export const removeItemfromCart = (cartItems,item) => {
          quantity:cartitem.quantity-1,
          totalPrice:(Number)(((cartitem.quantity-1)*cartitem.price).toFixed(2)),
          totalDiscount:(Number)(((((cartitem.quantity-1)*cartitem.price)*(cartitem.discount))/100).toFixed(2)),
-         SGST: (Number)((((cartitem.quantity-1)*cartitem.price)*((cartitem.tax/100)/2)).toFixed(2)),
-         CGST : (Number)((((cartitem.quantity-1)*cartitem.price)*((cartitem.tax/100)/2)).toFixed(2)),
+         SGST: (Number)(((((cartitem.quantity-1)*cartitem.price)-((((cartitem.quantity-1)*cartitem.price)*(cartitem.discount))/100))*((cartitem.tax/100)/2)).toFixed(2)),
+         CGST : (Number)(((((cartitem.quantity-1)*cartitem.price)-((((cartitem.quantity-1)*cartitem.price)*(cartitem.discount))/100))*((cartitem.tax/100)/2)).toFixed(2)),
      }: cartitem);
 }
 
@@ -37,8 +37,8 @@ export const changetaxCart = (cartItems,carttax) => {
         return cartItems.map((cartItem) => cartItem.id === carttax.item.id ?{
             ...cartItem,
             tax: carttax.tax,
-            SGST: (Number)((((cartItem.quantity)*cartItem.price)*((carttax.tax/100)/2)).toFixed(2)),
-            CGST : (Number)((((cartItem.quantity)*cartItem.price)*((carttax.tax/100)/2)).toFixed(2)),
+            SGST: (Number)(((((cartItem.quantity)*cartItem.price)-cartItem.totalDiscount)*((carttax.tax/100)/2)).toFixed(2)),
+            CGST : (Number)(((((cartItem.quantity)*cartItem.price)-cartItem.totalDiscount)*((carttax.tax/100)/2)).toFixed(2)),
         } : cartItem)
     }
     return [...cartItems]
@@ -51,6 +51,8 @@ export const changeDiscount = (cartItems, cartDiscount) => {
             ...cartitem,
             discount: cartDiscount.discount,
             totalDiscount: Number((((cartitem.totalPrice)*(cartDiscount.discount))/100).toFixed(2)),
+            SGST: (Number)((((cartitem.totalPrice)-(((cartitem.totalPrice)*(cartDiscount.discount))/100))*((cartitem.tax/100)/2)).toFixed(2)),
+            CGST : (Number)((((cartitem.totalPrice)-(((cartitem.totalPrice)*(cartDiscount.discount))/100))*((cartitem.tax/100)/2)).toFixed(2)), 
         }: cartitem)
     }
     return [...cartItems];
