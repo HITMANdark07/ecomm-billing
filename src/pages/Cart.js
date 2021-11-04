@@ -104,8 +104,6 @@ const Shop = (props) => {
     const handleLogout=()=>{
         auth.signOut().then(()=>{
             setUser(null);
-            history.push('/');
-            window.location.reload();
         })
     }
     const totalTax = props.cartItems.reduce((acc,emm) => acc+(emm.CGST+emm.SGST),0);

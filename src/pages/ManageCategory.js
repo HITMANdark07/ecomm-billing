@@ -49,8 +49,6 @@ const ManageCategory = (props) => {
     const handleLogout=()=>{
         auth.signOut().then(()=>{
             setUser(null);
-            history.push('/');
-            window.location.reload();
         })
     }
     const handleChange = (event,name) =>{

@@ -12,7 +12,6 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CircularProgress from '@mui/material/CircularProgress';
 import { auth, fs } from '../firebase/index';
-import { Redirect } from "react-router-dom";
 import { setCurrentUser } from '../redux/user/user.action';
 import {connect} from'react-redux';
 import makeToast from '../Toaster';
@@ -32,37 +31,61 @@ function Copyright(props) {
 
 const theme = createTheme();
 
-function SignInSide({setCurrentUser, currentUser}) {
+function SignInSide({setCurrentUser, currentUser,history}) {
   const [loading, setLoading] = React.useState(false);
-  const handleSubmitLogin = (event) => {
+
+  React.useEffect(() => {
+    if(currentUser && (currentUser.role==="admin" || currentUser.role==="staff")){
+      history.push("/shop");
+    }
+  },[currentUser,history]);
+  const handleSubmitLogin = async(event) => {
     event.preventDefault();
     setLoading(true);
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
-    auth.signInWithEmailAndPassword(data.get("email"),data.get("password")).then((user)=>{
-        if(user){
-          fs.collection("users").doc(user.uid).get().then(snapshot => {
-            var role = snapshot.data() && snapshot.data().role;
-            console.log(snapshot.data())
-            setLoading(false);
-            if(role==="staff" || role==="admin"){
-              setCurrentUser({...snapshot.data(),id:snapshot.id});
-            }
-      }).catch(() => {
-        makeToast("warning", "Contact Admin to Login");
-      })
-        }
-
-    }).catch(error=>{
-        makeToast("error", error.message);
+    try{
+      const res = await auth.signInWithEmailAndPassword(data.get("email"),data.get("password"));
+      const user = res.user;
+      const usr = await fs.collection("users").doc(user.uid).get();
+      const role = await usr.data().role;
+      if(role==="admin" || role==="staff"){
+        setCurrentUser({...usr.data(),id:usr.id});
         setLoading(false);
-    });
+        history.push("/shop");
+      }else{
+        makeToast("error","Contact Admin for Authorization");
+        setLoading(false);
+      }
+    }catch(error){
+      makeToast("error",error.message);
+      setLoading(false);
+    }
+    // auth.signInWithEmailAndPassword(data.get("email"),data.get("password")).then((user)=>{
+    //     if(user){
+    //       fs.collection("users").doc(user.uid).get().then(snapshot => {
+    //         var role = snapshot.data() && snapshot.data().role;
+    //         console.log(snapshot.data())
+    //         setLoading(false);
+    //         if(role==="staff" || role==="admin"){
+    //           setCurrentUser({...snapshot.data(),id:snapshot.id});
+    //         }
+    //   }).catch(() => {
+    //     makeToast("warning", "Contact Admin to Login");
+    //   })
+    //     }
+
+    // }).catch(error=>{
+    //     makeToast("error", error.message);
+    //     setLoading(false);
+    // });
   }
 
   return (
-    <ThemeProvider theme={theme}>{
+    <ThemeProvider theme={theme}>
+      {/* {
         currentUser && (currentUser.role==="admin" || currentUser.role==="staff") && <Redirect to="/shop" />
-    }
+    } */}
       <Grid container component="main" sx={{ height: '100vh' }}>
         <CssBaseline />
         <Grid

@@ -53,8 +53,6 @@ const ManageOrders = (props) => {
     const handleLogout=()=>{
         auth.signOut().then(()=>{
             setUser(null);
-            history.push('/');
-            window.location.reload();
         })
     }
     const ord = _.sortBy(orders,"date").reverse();

@@ -13,6 +13,7 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { auth, fs } from '../firebase/index';
 import makeToast from '../Toaster';
+import { connect } from 'react-redux';
 
 function Copyright(props) {
   return (
@@ -29,28 +30,52 @@ function Copyright(props) {
 
 const theme = createTheme();
 
-function SignUpSide(props) {
+function SignUpSide({currentUser,history}) {
   const [loading, setLoading] = React.useState(false);
-  const handleSubmit = (event) => {
+
+  React.useEffect(() => {
+    if(currentUser && (currentUser.role==="admin" || currentUser.role==="staff")){
+      history.push("/shop");
+    }
+  },[currentUser,history]);
+  const handleSubmit = async(event) => {
     event.preventDefault();
-    setLoading(true);
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
     if(data.get("email") && data.get("password") && data.get("name")){
-      auth.createUserWithEmailAndPassword(data.get("email"),data.get("password")).then((credentials)=>{
+      setLoading(true);
+      try{
+        const res = await auth.createUserWithEmailAndPassword(data.get("email"),data.get("password"));
+        const user = res.user;
+        await fs.collection("users").doc(user.uid).set({
+         FullName: data.get("name"),
+         Email: data.get("email"),
+         role: 'user'
+        })
         setLoading(false);
-        fs.collection('users').doc(credentials.user.uid).set({
-            FullName: data.get("name"),
-            Email: data.get("email"),
-            role: 'user'
-        }).then(()=>{
-          makeToast("warning", "Account Created. Contact admin for authorization.")
-            props.history.push("/");
-        }).catch(error=>console.log(error.message));
-    }).catch((error)=>{
-        makeToast("error", error.message);
+        auth.signOut();
+        makeToast("warning", "Account Created. Contact admin for authorization.")
+        history.push("/");
+      }catch(error){
+        makeToast("error",error.message);
         setLoading(false);
-    })
+      }
+    //   auth.createUserWithEmailAndPassword(data.get("email"),data.get("password")).then((credentials)=>{
+    //     setLoading(false);
+    //     fs.collection('users').doc(credentials.user.uid).set({
+    //         FullName: data.get("name"),
+    //         Email: data.get("email"),
+    //         role: 'user'
+    //     }).then(()=>{
+    //       makeToast("warning", "Account Created. Contact admin for authorization.")
+    //         props.history.push("/");
+    //     }).catch(error=>console.log(error.message));
+    // }).catch((error)=>{
+    //     makeToast("error", error.message);
+    //     setLoading(false);
+    // })
+    }else{
+      setLoading(false);
     }
   };
 
@@ -145,4 +170,7 @@ function SignUpSide(props) {
     </ThemeProvider>
   );
 }
-export default SignUpSide;
+const mapStateToprops = (state) => ({
+  currentUser: state.user.currentUser,
+})
+export default connect(mapStateToprops)(SignUpSide);

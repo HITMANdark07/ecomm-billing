@@ -52,8 +52,6 @@ const ManageAgents = (props) => {
     const handleLogout=()=>{
         auth.signOut().then(()=>{
             setUser(null);
-            history.push('/');
-            window.location.reload();
         })
     }
     const StyledTableCell = styled(TableCell)(({ theme }) => ({

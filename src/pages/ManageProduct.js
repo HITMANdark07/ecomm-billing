@@ -96,8 +96,6 @@ const ManageProduct = (props) => {
     const handleLogout=()=>{
         auth.signOut().then(()=>{
             setUser(null);
-            history.push('/');
-            window.location.reload();
         })
     }
     const handleUpdate = (e) => {

@@ -52,8 +52,6 @@ const SalesReport = (props) => {
     const handleLogout=()=>{
         auth.signOut().then(()=>{
             setUser(null);
-            history.push('/');
-            window.location.reload();
         })
     }
     const generateReport = useCallback((d1,d2) => {
@@ -62,8 +60,10 @@ const SalesReport = (props) => {
             setFilteredOrders(data);
         }
     },[orders]);
-    const ord = _.filter(orders,{status:"DELIVERED"});
+    var ord = _.filter(orders,{status:"DELIVERED"});
+    
     const createChartData = useCallback((ord) => {
+        ord = _.sortBy(ord,"date");
         var data={};
         var chartd =[];
         ord.forEach((order) => {

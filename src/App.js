@@ -1,11 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {Switch , Route} from 'react-router-dom';
 import './App.css';
-import { connect } from 'react-redux';
 import SignInSide from './pages/Signin';
 import SignUpSide from './pages/Signup';
-import {auth, fs} from "./firebase/index";
-import { setCurrentUser } from "./redux/user/user.action";
 import Shop from './pages/Shop';
 import Cart from './pages/Cart';
 import ManageCategory from './pages/ManageCategory';
@@ -15,43 +12,43 @@ import ManageOrder from './pages/ManageOrder';
 import ManageAgents from './pages/ManageAgents';
 import SalesReport from './pages/SalesReport';
 import Bill from './pages/Bill';
-import makeToast from './Toaster';
+// import makeToast from './Toaster';
 import UpdateCat from './pages/UpdateCat';
 
 function App(props) {
-  const setUser = props.setCurerntUser;
-  const currentUsr = props.currentUser;
+  // const setUser = props.setCurerntUser;
+  // const currentUsr = props.currentUser;
 
-  useEffect(() =>{
-    let subs;
-    if(!currentUsr){
-      subs = auth.onAuthStateChanged(user => {
-        if(user){
-          fs.collection("users").doc(user.uid).get().then(async snapshot => {
-            var role = await snapshot.data() && snapshot.data().role;
-            if(role==="staff" || role==="admin"){
-              setUser({...snapshot.data(),id:snapshot.id});
-            }else{
-              auth.signOut().then(()=>{
-                setUser(null);
-                console.log("run here1");
-                makeToast("warning", "Contact Admin to Login")
-            })
-            }
-          })
-        }
-      })
-    }
-    if(currentUsr && currentUsr.role==="user"){
-          auth.signOut().then(()=>{
-            setUser(null);
-        console.log("run here2");
-            makeToast("warning", "Contact Admin to Login")
-        })
-    }
+  // useEffect(() =>{
+  //   let subs;
+  //   if(!currentUsr){
+  //     subs = auth.onAuthStateChanged(user => {
+  //       if(user){
+  //         fs.collection("users").doc(user.uid).get().then(async snapshot => {
+  //           var role = await snapshot.data() && snapshot.data().role;
+  //           if(role==="staff" || role==="admin"){
+  //             setUser({...snapshot.data(),id:snapshot.id});
+  //           }else{
+  //             auth.signOut().then(()=>{
+  //               setUser(null);
+  //               console.log("run here1");
+  //               makeToast("warning", "Contact Admin to Login")
+  //           })
+  //           }
+  //         })
+  //       }
+  //     })
+  //   }
+  //   if(currentUsr && currentUsr.role==="user"){
+  //         auth.signOut().then(()=>{
+  //           setUser(null);
+  //       console.log("run here2");
+  //           makeToast("warning", "Contact Admin to Login")
+  //       })
+  //   }
 
-    return () => subs;
-  },[currentUsr,setUser]);
+  //   return () => subs;
+  // },[currentUsr,setUser]);
   return (
       <Switch>
         <Route exact path="/" component={SignInSide} />
@@ -69,11 +66,11 @@ function App(props) {
       </Switch>
   );
 }
-const mapDispatchToProps = (dispatch) => ({
-  setCurerntUser : user => dispatch(setCurrentUser(user))
-})
-const mapStateToProps = (state) => ({
-  currentUser : state.user.currentUser
-})
+// const mapDispatchToProps = (dispatch) => ({
+//   setCurerntUser : user => dispatch(setCurrentUser(user))
+// })
+// const mapStateToProps = (state) => ({
+//   currentUser : state.user.currentUser
+// })
 
-export default connect(mapStateToProps,mapDispatchToProps)(App);
+export default App;
